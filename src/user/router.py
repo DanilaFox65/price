@@ -11,7 +11,7 @@ from core.settings import AppSettings
 from database.models import User
 from src.dependencies.authentication import get_token_payload, get_current_user, security
 from src.user.auth import create_refresh_token, create_access_token
-from src.user.schemas import UserOut, UserIn, TokenResponse, UserUpdate
+from src.user.schemas import UserOut, UserIn, TokenResponse, UserUpdate, Info
 
 router = APIRouter()
 
@@ -286,6 +286,28 @@ async def delete_user(
 
   return {"message": "Пользователь успешно удалён!"}
 
+@router.post(
+    "/user/look_info",
+    response_model=Info,
+    description="Просмотр информации о конкретном пользователе",
+    summary="Просмотр информации о конкретном пользователе",
+    responses={
+        200: {"description": "Пользователь найден в системе!"},
+        404: {"description": "Пользователь в системе не найден"},
+        500: {"description": "Пользователь в системе не найден"}
+    }
+)
+async def look_info(
+        username: str,
+        db_connect: AsyncSession = Depends(get_db)
+):
+    user_info: User = (await db_connect.execute(select(User).filter(User.username == username))).scalar()
+    if not user_info:
+        raise HTTPException(status_code=404, detail="Пользователь в системе не обнаружен")
+    return Info(
+        username=user_info.username,
+        phone=user_info.phone
+    )
 
 
 

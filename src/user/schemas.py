@@ -42,6 +42,11 @@ class UserUpdate(BaseModel):
     password: str | None
     phone: str | None
 
+
+class Info(BaseModel):
+  username: str
+  phone: str
+
 class TokenResponse(BaseModel):
   user_id: int
   username: str
